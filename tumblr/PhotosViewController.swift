@@ -23,7 +23,7 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.dataSource = self
         tableView.delegate = self
 
-        //Mark: Network Request
+    //Mark: Network Request
         let url = URL(string:"https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV")
         let request = URLRequest(url: url!)
         let session = URLSession(
@@ -55,6 +55,8 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         task.resume()
         
     }
+    
+    //Mark: Construct table view and rows
 
     // 1 of 2 required method by UITableViewDataSource Protocol
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -84,5 +86,29 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         }
         
         return cell
+    }
+    
+    
+    //Mark: Segue to details view controller
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let vc = segue.destination as! PhotoDetailsViewController
+        
+        // index path is [Col, Row]
+        let indexPath = tableView.indexPath(for: sender as! PhotoTableViewCell)!
+        
+        // IndexPath.row what row/cell are we on
+        let post = posts[indexPath.row]
+        
+        // Prep image from selected cell to be sent to destination view controller
+        if let photos = post.value(forKeyPath: "photos") as? [NSDictionary] {
+            if let imageUrlString = photos[0].value(forKeyPath: "original_size.url") as? String {
+                let imageUrl = URL(string: imageUrlString)!
+                vc.photoUrl = imageUrl
+            } else {
+                print("No image url")
+            }
+        } else {
+            print("Photos is nil")
+        }
     }
 }
